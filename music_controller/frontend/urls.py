@@ -2,5 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns =[
-    path('',views.index, name='index')
+    path('',views.index, name='index'),
+    path('join',views.index, name='join'),
+    path('create',views.index, name='create'),
 ]
