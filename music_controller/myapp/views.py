@@ -7,6 +7,7 @@ from .models import Room
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+
 # Create your views here.
 def main(request):
     return HttpResponse("<h1>hello</h1>Hello")
@@ -17,6 +18,11 @@ class RoomView(generics.CreateAPIView):
 
 class CreateRoom(APIView):
     serializer_class = CreateRoomSerializer
+    
+    #Removes authentication
+    authentication_classes = []
+    permission_classes = []
+
     def post(self, request, format=None):
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
