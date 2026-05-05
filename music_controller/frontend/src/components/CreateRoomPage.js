@@ -123,7 +123,7 @@ class CreateRoomPage extends Component {
     }
 }
 
-export default function RoomJoinPageWrapper() {
+export default function CreateRoomPageWrapper() {
     const navigate = useNavigate();
     return <CreateRoomPage navigate={navigate} />;
 }

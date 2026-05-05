@@ -18,7 +18,7 @@ class RoomView(generics.CreateAPIView):
 
 class CreateRoom(APIView):
     serializer_class = CreateRoomSerializer
-    
+
     #Removes authentication
     authentication_classes = []
     permission_classes = []
@@ -56,9 +56,9 @@ class GetRoom(APIView) :
     lookup_url_kwarg = 'roomCode'
 
     def get(self, request, format=None) :
-        code = request.GET.get(self.lookup_url_kwarg)
-        if code is not  None :
-            room = Room.objects.filter(code=code)
+        roomCode = request.GET.get(self.lookup_url_kwarg)
+        if roomCode is not  None :
+            room = Room.objects.filter(code=roomCode)
             if room.exists() :
                 data = RoomSerializer(room[0]).data
                 if self.request.session.session_key == room[0].host :
@@ -71,5 +71,26 @@ class GetRoom(APIView) :
 
         return Response({'Bad Request' : 'Code not Found '}, status = status.HTTP_400_BAD_REQUEST)
 
+class JoinRoom(APIView) :
+    authentication_classes = []
+    permission_classes = []
 
+    lookup_url_kwarg = "roomCode"
+    def post(self, request, format=None):
+        if not self.request.session.exists(self.request.session.session_key):
+            self.request.session.create()
 
+        roomCode = request.data.get(self.lookup_url_kwarg)
+        print(roomCode)
+        print("outside")
+        if roomCode is not None:
+            print("inside")
+            room_result = Room.objects.filter(code=roomCode)
+            if room_result.exists():
+                room = room_result[0]
+                self.request.session['room_code'] = room.code
+                return Response({'roomCode' : roomCode},status=status.HTTP_200_OK)
+            
+            return Response({'Room Not Found' : "Invalid Room Code"}, status=status.HTTP_404_NOT_FOUND)
+        
+        return Response({"Bad Request" : "Invalid Data"}, status=status.HTTP_400_BAD_REQUEST)
