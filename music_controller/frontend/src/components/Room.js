@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { useParams } from "react-router-dom";
+import { Grid, Typography, Button } from "@mui/material";
+import { Link, useNavigate } from "react-router-dom";
 
 class Room extends Component {
     constructor(props) {
@@ -11,15 +13,16 @@ class Room extends Component {
             eror: null
         };
         this.getRoomDetails();
+        this.handleGoBackButton = this.handleGoBackButton.bind(this);
     }
 
+
     getRoomDetails() {
+        const navigate = this.props.navigate;
         fetch('/api/room' + "?roomCode=" + this.props.roomCode)
         .then((response) => {
             if (!response.ok) {
-                return response.json().then((data)=>{
-                    throw new Error(Object.values(data)[0]);
-                });
+                navigate("/");
             }
             return response.json();
         })
@@ -38,45 +41,52 @@ class Room extends Component {
         });
     }
 
+    handleGoBackButton () {
+        const navigate = this.props.navigate;
+        const requestOptions = {
+            method : "POST",
+            headers : {"Content-Type" : "application/json"},
+        }
+        fetch('/api/leave_room',requestOptions);
+        navigate("/");
+        console.log("Left the room");
+    }
+
     render() {
-        // this.props is universal and can be used in any component
-        const { roomCode } = this.props;
-        if (this.state.error) {
-            return (
-                <div><p>{this.state.error}</p></div>
-                
-            );
-        }
-
-        else if (this.state.votesToSkip == null) {
-                <div>
-                    <p>Loading...</p>
-                </div>
-        }
-
-        else {
-            return (
-                <div>
-                    <p>Room Code : {roomCode}</p>
-                    <p>
+        return (
+            <Grid container spacing ={1}>
+                <Grid item xs={12} align="center">
+                    <Typography component="h4" variant="h4">
+                        Room Code : {this.props.roomCode}
+                    </Typography>
+                </Grid>
+                <Grid item xs={12} align="center">
+                    <Typography component="h6" variant="h6">
                         Votes to skip : {this.state.votesToSkip}
-                    </p>
-                    <p>
+                    </Typography>
+                </Grid>
+                <Grid item xs={12} align="center">
+                    <Typography component="h6" variant="h6">
                         Guest can Pause : {String(this.state.guestCanPause)}
-                    </p>
-                    <p>
+                    </Typography>
+                </Grid>
+                <Grid item xs={12} align="center">
+                    <Typography component="h6" variant="h6">
                         Host : {String(this.state.isHost)}
-                    </p>
-                </div>
-            );
-        }
-        
+                    </Typography>
+                </Grid>
+                <Grid item xs={12} align="center">
+                    <Button variant="contained" color ="primary" onClick={this.handleGoBackButton}>Go Back</Button>
+                </Grid>
+            </Grid>
+        )
     }
 }
 
 export default function RoomWrapper() {
     // Reads roomCode from the URL using the useParams hook
+    const navigate=useNavigate();
     const { roomCode } = useParams();
     // Calling the Room component in line 4 and passing the {roomCode} to an argument roomCode
-    return <Room roomCode={roomCode} />;
+    return <Room roomCode={roomCode} navigate={navigate} />;
 }
