@@ -2,7 +2,6 @@ import React, { Component } from "React";
 import { TextField, Button, Grid, Typography } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
-
 class RoomJoinPage extends Component {
     constructor(props) {
         super(props);

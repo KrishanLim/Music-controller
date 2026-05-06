@@ -76,7 +76,10 @@ class Room extends Component {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
-                    <Button variant="contained" color ="primary" onClick={this.handleGoBackButton}>Go Back</Button>
+                    <Button variant="contained" color="primary" component={Link} to="/edit_room">Edit Room</Button>
+                </Grid>
+                <Grid item xs={12} align="center">
+                    <Button variant="contained" color ="secondary" onClick={this.handleGoBackButton}>Go Back</Button>
                 </Grid>
             </Grid>
         )

@@ -10,3 +10,11 @@ class CreateRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = Room
         fields = ('guest_can_pause','votes_to_skip')
+
+class UpdateRoomSerializer(serializers.ModelSerializer):
+    # Bypasses the unique=True constraint from models.py/Room
+    code = serializers.CharField(validators = [])
+
+    class Meta:
+        model = Room
+        fields = ('guest_can_pause','votes_to_skip','code')
