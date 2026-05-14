@@ -1,7 +1,7 @@
-import React, { Component } from 'react';
-import { useParams } from "react-router-dom";
+import React, { Component, useState, useEffect } from 'react';
 import { Grid, Typography, Button } from "@mui/material";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import CreateRoomPageWrapper from "./CreateRoomPage";
 
 class Room extends Component {
     constructor(props) {
@@ -10,12 +10,14 @@ class Room extends Component {
             votesToSkip: null,
             guestCanPause: null,
             isHost: null,
-            eror: null
+            eror: null,
+            settings : false
         };
         this.getRoomDetails();
         this.handleGoBackButton = this.handleGoBackButton.bind(this);
+        this.renderSettingsButton = this.renderSettingsButton.bind(this);
+        this.renderSettings = this.renderSettings.bind(this);
     }
-
 
     getRoomDetails() {
         const navigate = this.props.navigate;
@@ -52,7 +54,48 @@ class Room extends Component {
         console.log("Left the room");
     }
 
+
+    handleSettings(value) {
+        this.setState({
+            settings: value
+        });
+    }
+
+    renderSettingsButton() {
+        // const settingsLink = "/room/" + this.props.roomCode + "/settings";
+        return (
+            <Grid item xs={12} align="center">
+                <Button variant="contained" color="secondary" onClick={() => this.handleSettings(true)}>Settings
+                </Button>
+            </Grid>
+        );
+    }
+
+    renderSettings() {
+        return (
+            <Grid container spacing={1}>
+                <Grid item xs={12} align="center">
+                    <CreateRoomPageWrapper
+                        update={true}
+                        votesToSkip={this.state.votesToSkip}
+                        guestCanPause={this.state.guestCanPause}
+                        roomCode={this.props.roomCode}
+                        updateCallback={() => {this.getRoomDetails()}}
+                    />
+                </Grid>
+                <Grid item xs={12} align="center">
+                    <Button variant="contained" color="secondary" onClick={() =>this.handleSettings(false)}>
+                        Close
+                    </Button>
+                </Grid>
+            </Grid>
+        );
+    }
+
     render() {
+        if(this.state.settings === true) {
+            return this.renderSettings();
+        }
         return (
             <Grid container spacing ={1}>
                 <Grid item xs={12} align="center">
@@ -75,9 +118,9 @@ class Room extends Component {
                         Host : {String(this.state.isHost)}
                     </Typography>
                 </Grid>
-                <Grid item xs={12} align="center">
-                    <Button variant="contained" color="primary" component={Link} to="/edit_room">Edit Room</Button>
-                </Grid>
+                {(this.state.isHost === true) && (
+                    this.renderSettingsButton()
+                )}
                 <Grid item xs={12} align="center">
                     <Button variant="contained" color ="secondary" onClick={this.handleGoBackButton}>Go Back</Button>
                 </Grid>
@@ -88,8 +131,8 @@ class Room extends Component {
 
 export default function RoomWrapper() {
     // Reads roomCode from the URL using the useParams hook
-    const navigate=useNavigate();
+    const navigate = useNavigate();
     const { roomCode } = useParams();
     // Calling the Room component in line 4 and passing the {roomCode} to an argument roomCode
-    return <Room roomCode={roomCode} navigate={navigate} />;
+    return <Room roomCode={roomCode} navigate={navigate}/>;
 }

@@ -25,6 +25,7 @@ class CreateRoom(APIView):
     permission_classes = []
 
     def post(self, request, format=None):
+        print("save clicked")
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
 
@@ -39,6 +40,7 @@ class CreateRoom(APIView):
                 room = querySet[0]
                 room.guest_can_pause = guest_can_pause
                 room.votes_to_skip = votes_to_skip
+                self.request.session['room_code'] = room.code
                 room.save(update_fields = ['guest_can_pause','votes_to_skip'])
 
                 #returns the data in Json format
@@ -46,6 +48,7 @@ class CreateRoom(APIView):
 
             else:
                 room = Room(host=host,guest_can_pause=guest_can_pause,votes_to_skip=votes_to_skip)
+                self.request.session['room_code'] = room.code
                 room.save()
 
                 #returns the data in Json format
@@ -112,26 +115,33 @@ class LeaveRoom(APIView):
     permission_classes = []
 
     print("hello")
+    
     def post(self, request, format=None):
+        if not self.request.session.exists(self.request.session.session_key):
+            self.request.session.create()
         if "room_code" in self.request.session:
             print("inside")
             self.request.session.pop("room_code")
             host_id = self.request.session.session_key
-            room_result = Room.objects.filter(host=host_id)
-            if room_result.exists():
-                room=room_result[0]
+            is_host = Room.objects.filter(host=host_id)
+            if is_host:
+                room=is_host[0]
                 room.delete()
 
             return Response({"message" : "Sucessfully left the room"}, status=status.HTTP_200_OK)
         return Response({"Bad Request" : "Invalid Data"}, status=status.HTTP_400_BAD_REQUEST)
 
 class UpdateRoom(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+
     serializer_class = UpdateRoomSerializer
     def patch(self, request, format=None):
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
 
-        serializer = self.serializer_class(request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid() :
             guest_can_pause = serializer.data.get("guest_can_pause")
             votes_to_skip = serializer.data.get("votes_to_skip")
