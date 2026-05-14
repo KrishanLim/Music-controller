@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'myapp.apps.MyappConfig',
     'frontend.apps.FrontendConfig',
+    'spotify.apps.SpotifyConfig',
 ]
 
 MIDDLEWARE = [
