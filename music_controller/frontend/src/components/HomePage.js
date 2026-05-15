@@ -6,10 +6,15 @@ import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-ro
 import { Button, Grid, ButtonGroup, Typography } from "@mui/material";
 
 class HomePage extends Component {
+
+    static defaultProps ={
+        roomCode : null
+    }
+
     constructor(props) {
         super(props);
         this.state = {
-            roomCode: null
+            roomCode: this.props.roomCode
         };
     }
 

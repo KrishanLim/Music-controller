@@ -103,7 +103,9 @@ class UserInRoom(APIView):
     def get(self, request, format=None):
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
-        
+        room_code = self.request.session.get('room_code')
+        if roomCode is None:
+            return Response({'roomCode' : 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
         data= {
             'room_code' : self.request.session.get('room_code')
         }
