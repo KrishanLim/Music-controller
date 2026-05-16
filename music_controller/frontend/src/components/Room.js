@@ -23,7 +23,6 @@ class Room extends Component {
         this.renderSettings = this.renderSettings.bind(this);
         this.authenticateSpotify = this.authenticateSpotify.bind(this);
         this.getCurrentSong = this.getCurrentSong.bind(this);
-        this.renderMusicPlayer = this.renderMusicPlayer.bind(this);
     }
 
     componentDidMount() {
@@ -67,7 +66,6 @@ class Room extends Component {
                 spotifyAuthenticated : data.status
             });
             if(!data.status) {
-                console.log(data);
                 fetch('/spotify/get-auth-url/')
                 .then((response) => response.json())
                 .then((data) => {
@@ -89,10 +87,10 @@ class Room extends Component {
             }
         }).then((data) => {
             this.setState({
-                song : data
+                song : data.success
             });
-            console.log(data.success);
         });
+        console.log(this.state.song);
     }
 
     handleGoBackButton () {
@@ -148,8 +146,8 @@ class Room extends Component {
 
     renderMusicPlayer() {
         return (
-                <MusicPlayerWrapper song={this.state.song}/>
-        );
+            <MusicPlayerWrapper song={this.state.song}/>
+        )
     }
 
     render() {
@@ -164,11 +162,15 @@ class Room extends Component {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
-                    {this.renderMusicPlayer()}
+                    {(this.state.song.title) && (
+                    <MusicPlayerWrapper song={this.state.song}/>
+                    )}
                 </Grid>
-                {(this.state.isHost === true) && (
-                    this.renderSettingsButton()
-                )}
+                <Grid item xs={12} align="center">
+                    {(this.state.isHost === true) && (
+                        this.renderSettingsButton()
+                    )}
+                </Grid>
                 <Grid item xs={12} align="center">
                     <Button variant="contained" color ="secondary" onClick={this.handleGoBackButton}>Go Back</Button>
                 </Grid>

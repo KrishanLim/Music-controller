@@ -11,20 +11,67 @@ class MusicPlayer extends Component {
 
     constructor(props){
         super(props);
-        this.state = {
-            song : this.props.song
-        };
-        console.log(this.state.song);    
+        console.log('Musicc Player');    
+        this.handlePauseClick = this.handlePauseClick.bind(this);
+        this.handlePlayClick = this.handlePlayClick.bind(this);
     }
     
+    handlePauseClick() {
+        const requestOptions = {
+            method : "PUT",
+            headers : {"Content-Type" : "application/json"},
+        }
+        fetch('/spotify/pause-song/',requestOptions);
+    }
+
+    handlePlayClick() {
+        const requestOptions = {
+            method : "PUT",
+            headers : {"Content-Type" : "application/json"},
+        }
+        fetch('/spotify/play-song/',requestOptions);
+    }
 
     render() {
+        const progress = (this.props.song.time/this.props.song.duration) *100
         return (
-            <Card>
-                <Grid container align='center'>
+            <Card square>
+                <Grid container alignItems='center'>
                     <Grid item align='center' xs={4}>
-                        <img src={this.state.song.image} height='100%' width='100%'/>
+                        <img src={this.props.song.image_url} height='100%' width='100%'/>
                     </Grid>
+                        <Grid item align='center' xs={4} direction='column'>
+                            <Grid item align='center' xs={4}>
+                                <Typography variant='h4' component='h4'>
+                                    {this.props.song.title}
+                                </Typography>
+                                <Typography variant='subtitle1' color="textSecondary">
+                                    {this.props.song.artist}
+                                </Typography>
+                            </Grid>
+                            <Grid item align='center' xs={4}>
+                                <div>
+                                    <Grid item align='center' xs={12}>
+                                        <IconButton
+                                            onClick = {() => {(this.props.song.is_playing) ? this.handlePauseClick() : this.handlePlayClick()}}
+                                        >
+                                        {this.props.song.is_playing ? 
+                                        <PauseIcon /> 
+                                        : <PlayArrowIcon/>
+                                        }
+                                        </IconButton>
+                                    </Grid>
+                                    <Grid item align='center' xs={12}>
+                                        <IconButton>
+                                        <SkipNextIcon/>
+                                        </IconButton>
+                                    </Grid>
+                                </div>
+                            </Grid>
+                            <Grid item align='center' xs={12}>
+                                <LinearProgress variant="determinate" value= {progress}/>
+                            </Grid>
+                        </Grid>
                 </Grid>
             </Card>
         );

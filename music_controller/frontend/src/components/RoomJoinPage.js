@@ -23,18 +23,18 @@ class RoomJoinPage extends Component {
                 </Grid>
                 <Grid item xs = {12} textAlign="center">
                     <TextField
-                    variant = "outlined"
-                    error = {this.state.error}
-                    label = "Code"
-                    placeholder = "Enter A Room Code"
-                    value = {this.state.roomCode}
-                    helperText = {this.state.error}
-                    onChange = {this.handleRoomCodeChange}
-                    inputProps = {{
-                        style: {
-                            textAlign : "center"
-                        }
-                    }}
+                        variant = "outlined"
+                        error = {this.state.error}
+                        label = "Code"
+                        placeholder = "Enter A Room Code"
+                        value = {this.state.roomCode}
+                        helperText = {this.state.error}
+                        onChange = {this.handleRoomCodeChange}
+                        inputProps = {{
+                            style: {
+                                textAlign : "center"
+                            }
+                        }}
                     />
                 </Grid>
                 <Grid item xs ={12} textAlign="center">
@@ -43,7 +43,6 @@ class RoomJoinPage extends Component {
                 <Grid item xs ={12} textAlign="center">
                         <Button variant = "contained" color="secondary" component = {Link} to = "/">Back</Button>
                 </Grid>
-
             </Grid>
         );
     }

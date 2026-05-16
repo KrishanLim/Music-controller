@@ -60,7 +60,6 @@ class HomePage extends Component {
                     <Route path="/join" element={<RoomJoinPage/>}></Route>
                     <Route path="/create" element={<CreateRoomPage/>}></Route>
                     <Route path="/room/:roomCode" element={<Room/>}></Route>
-                    <Route path="/music-player" element={<MusicPlayer/>}></Route>
                 </Routes>
             </Router>
         );
