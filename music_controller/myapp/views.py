@@ -104,10 +104,16 @@ class UserInRoom(APIView):
         if not self.request.session.exists(self.request.session.session_key):
             self.request.session.create()
         room_code = self.request.session.get('room_code')
-        if roomCode is None:
+        if room_code is None:
+            return Response({'roomCode' : 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
+        # The room may have been deleted (e.g. the host left) while this
+        # session still holds the code. Clear the stale value so the client
+        # doesn't get redirected into a room that no longer exists.
+        if not Room.objects.filter(code=room_code).exists():
+            self.request.session.pop('room_code', None)
             return Response({'roomCode' : 'Not Found'}, status=status.HTTP_404_NOT_FOUND)
         data= {
-            'room_code' : self.request.session.get('room_code')
+            'room_code' : room_code
         }
         print(data)
         return JsonResponse(data, status=status.HTTP_200_OK)

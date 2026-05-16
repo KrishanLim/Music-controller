@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import CreateRoomPage from "./CreateRoomPage";
 import RoomJoinPage from "./RoomJoinPage";
 import Room from "./Room";
+import MusicPlayer from "./MusicPlayer";
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
 import { Button, Grid, ButtonGroup, Typography } from "@mui/material";
 
@@ -59,6 +60,7 @@ class HomePage extends Component {
                     <Route path="/join" element={<RoomJoinPage/>}></Route>
                     <Route path="/create" element={<CreateRoomPage/>}></Route>
                     <Route path="/room/:roomCode" element={<Room/>}></Route>
+                    <Route path="/music-player" element={<MusicPlayer/>}></Route>
                 </Routes>
             </Router>
         );

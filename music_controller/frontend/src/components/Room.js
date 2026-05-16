@@ -3,6 +3,7 @@ import { Grid, Typography, Button } from "@mui/material";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import CreateRoomPageWrapper from "./CreateRoomPage";
 import HomePageWrapper from "./HomePage"
+import MusicPlayerWrapper from "./MusicPlayer";
 
 class Room extends Component {
     constructor(props) {
@@ -13,13 +14,24 @@ class Room extends Component {
             isHost: null,
             eror: null,
             settings : false,
-            spotifyAuthenticated : false
+            spotifyAuthenticated : false,
+            song : {}
         };
         this.getRoomDetails();
         this.handleGoBackButton = this.handleGoBackButton.bind(this);
         this.renderSettingsButton = this.renderSettingsButton.bind(this);
         this.renderSettings = this.renderSettings.bind(this);
         this.authenticateSpotify = this.authenticateSpotify.bind(this);
+        this.getCurrentSong = this.getCurrentSong.bind(this);
+        this.renderMusicPlayer = this.renderMusicPlayer.bind(this);
+    }
+
+    componentDidMount() {
+        this.interval = setInterval(this.getCurrentSong, 1000);
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
     getRoomDetails() {
@@ -28,12 +40,14 @@ class Room extends Component {
         .then((response) => {
             if (!response.ok) {
                 navigate("/");
+                return null;
             }
-            else{
-                return response.json();
-            }
+            return response.json();
         })
         .then((data) => {
+            if (!data) {
+                return;
+            }
             this.setState({
                 votesToSkip: data.votes_to_skip,
                 guestCanPause: data.guest_can_pause,
@@ -64,6 +78,23 @@ class Room extends Component {
         .catch((err) => console.log(err));
     }
 
+    getCurrentSong() {
+        fetch('/spotify/current-song/')
+        .then((response) => {
+            if (!response.ok) {
+                return {};
+            }
+            else {
+                return response.json();
+            }
+        }).then((data) => {
+            this.setState({
+                song : data
+            });
+            console.log(data.success);
+        });
+    }
+
     handleGoBackButton () {
         const navigate = this.props.navigate;
         const requestOptions = {
@@ -72,15 +103,13 @@ class Room extends Component {
         }
         fetch('/api/leave_room',requestOptions)
         .then(() => {
-            <HomePageWrapper
-                roomCode = {null}
-            />
             navigate("/")
-        });   
+        });
         console.log("Left the room");
     }
 
     handleSettings(value) {
+        console.log(this.state.spotifyAuthenticated);
         this.setState({
             settings: value
         });
@@ -117,6 +146,12 @@ class Room extends Component {
         );
     }
 
+    renderMusicPlayer() {
+        return (
+                <MusicPlayerWrapper song={this.state.song}/>
+        );
+    }
+
     render() {
         if(this.state.settings === true) {
             return this.renderSettings();
@@ -129,19 +164,7 @@ class Room extends Component {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
-                    <Typography component="h6" variant="h6">
-                        Votes to skip : {this.state.votesToSkip}
-                    </Typography>
-                </Grid>
-                <Grid item xs={12} align="center">
-                    <Typography component="h6" variant="h6">
-                        Guest can Pause : {String(this.state.guestCanPause)}
-                    </Typography>
-                </Grid>
-                <Grid item xs={12} align="center">
-                    <Typography component="h6" variant="h6">
-                        Host : {String(this.state.isHost)}
-                    </Typography>
+                    {this.renderMusicPlayer()}
                 </Grid>
                 {(this.state.isHost === true) && (
                     this.renderSettingsButton()
