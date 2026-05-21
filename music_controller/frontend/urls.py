@@ -9,4 +9,5 @@ urlpatterns =[
     path('create',views.index,),
     path('room/<str:roomCode>',views.index),
     path('music-player',views.index,),
+    path('info',views.index,),
 ]

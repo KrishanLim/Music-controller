@@ -117,7 +117,7 @@ class Room extends Component {
         // const settingsLink = "/room/" + this.props.roomCode + "/settings";
         return (
             <Grid item xs={12} align="center">
-                <Button variant="contained" color="secondary" onClick={() => this.handleSettings(true)}>Settings
+                <Button variant="contained" color="primary" onClick={() => this.handleSettings(true)}>Settings
                 </Button>
             </Grid>
         );
