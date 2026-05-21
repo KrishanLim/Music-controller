@@ -11,3 +11,5 @@ sqlparse==0.5.5
 tzdata==2026.2
 urllib3==2.7.0
 dj-database-url==3.0.1 
+gunicorn
+whitenoise
