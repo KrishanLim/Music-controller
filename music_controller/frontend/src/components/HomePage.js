@@ -5,29 +5,30 @@ import Room from "./Room";
 import MusicPlayer from "./MusicPlayer";
 import { BrowserRouter as Router, Routes, Route, Link, Navigate } from "react-router-dom";
 import { Button, Grid, ButtonGroup, Typography } from "@mui/material";
+import Info from "./Info";
 
 class HomePage extends Component {
-
-    static defaultProps ={
-        roomCode : null
-    }
-
     constructor(props) {
         super(props);
         this.state = {
-            roomCode: this.props.roomCode
+            roomCode: null
         };
     }
 
     async componentDidMount() {
         fetch("/api/user_in_room")
-        .then((response) => response.json())
-        .then((data) => {
-            this.setState({
-                roomCode: data.room_code
-            });
-            console.log(data);
-        });
+        .then((response) => {
+            if (response.ok){
+                response.json()
+                .then((data) => {
+                    this.setState({
+                        roomCode: data.code
+                    });
+                })
+                .catch((err) => console.log(err));
+            }
+        })
+        .catch((err) => console.log(err));
     }
 
     renderHomePage() {
@@ -39,9 +40,10 @@ class HomePage extends Component {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} textAlign="center">
-                    <ButtonGroup disableElevation variant='contained' color="primary">
-                        <Button variant="contained" color="primary" component={Link} to="/create">Create Room</Button>
-                        <Button variant="contained" color="secondary" component={Link} to="/join">Join Room</Button>  
+                    <ButtonGroup disableElevation variant='contained'>
+                        <Button variant="contained" color="primary" component={Link} to="/create">Create</Button>
+                        <Button variant = "outlined" sx={{ backgroundColor: "gray" }} component={Link} to="/info">Info</Button>
+                        <Button variant="contained" color="secondary" component={Link} to="/join">Join Room</Button>
                     </ButtonGroup>
                 </Grid>
             </Grid>
@@ -53,13 +55,14 @@ class HomePage extends Component {
             <Router>
                 <Routes>
                     <Route path="/" element={
-                        this.state.roomCode ? (<Navigate to= {`/room/${this.state.roomCode}`}/>):
+                        (this.state.roomCode) ? (<Navigate to= {`/room/${this.state.roomCode}`}/>):
                         this.renderHomePage()
                         }/>
                         {/* The <RoomJoinPage/>, <CreateRoomPage/> and <Room/> are just alias and can be called anything */}
                     <Route path="/join" element={<RoomJoinPage/>}></Route>
                     <Route path="/create" element={<CreateRoomPage/>}></Route>
                     <Route path="/room/:roomCode" element={<Room/>}></Route>
+                    <Route path="/info" element={<Info/>}/>
                 </Routes>
             </Router>
         );

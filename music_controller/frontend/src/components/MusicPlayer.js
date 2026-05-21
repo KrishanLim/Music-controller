@@ -42,7 +42,8 @@ class MusicPlayer extends Component {
             headers : {"Content-Type" : "application/json"},
         }
 
-        fetch('/spotify/skip-next-song/', requestOptions);
+        fetch('/spotify/skip-next-song/', requestOptions)
+        .then((response)=> console.log(response));
     }
 
     handlePlayClick() {
@@ -87,6 +88,11 @@ class MusicPlayer extends Component {
                                         <SkipNextIcon/>
                                     </IconButton>
                                 </div>
+                                <Grid item align='center' xs={12}>
+                                    <Typography variant='subtitle1' color="textSecondary">
+                                        Votes: {this.props.song.votes}/{this.props.song.votes_required}
+                                    </Typography>
+                                </Grid>
                             </Grid>
                             <Grid item align='center' xs={12}>
                                 <Grid item align='center' xs={6}>

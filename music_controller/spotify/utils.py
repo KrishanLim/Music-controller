@@ -4,10 +4,13 @@ from datetime import timedelta
 from .credentials import CLIENT_ID, CLIENT_SECRET
 from requests import post, put, get
 from rest_framework import status
+from myapp.models import Room
+from .models import Vote
 
 BASE_URL = "https://api.spotify.com/v1/me/"
 
 def get_user_tokens(session_key):
+
     user_tokens = SpotifyToken.objects.filter(user=session_key)
     print(user_tokens)
     if user_tokens.exists():
@@ -69,12 +72,86 @@ def execute_spotify_api_request(session_key, endpoint, post_=False, put_=False):
     except:
         return {'error' : 'Error at spotify api request'}
 
-def pause_song(session_key):
+def user_can_skip(session_key, room_code):
+    room = Room.objects.filter(code=room_code)[0]
+
+    if room.host == session_key:
+        return True
+
+    # Deletes the vote data if the song has changed
+    vote_data = Vote.objects.filter(room=room)
+
+    if vote_data.exists():
+        if vote_data[0].song_id != room.current_song:
+            vote_data.delete()
+
+        user_vote = vote_data.filter(user=session_key)
+        if user_vote.exists():
+            user_vote.delete()
+        Vote.objects.create(user=session_key, song_id=room.current_song, room=room)
+        vote_count = vote_data.count()
+        if vote_count >=room.votes_to_skip:
+            return True
+        return {'success' : 'not enough votes to skip'}
+
+    Vote.objects.create(user=session_key, song_id=room.current_song, room=room)
+    vote_count = vote_data.count()
+    if vote_count >=room.votes_to_skip:
+        return True
+
+def user_can_play_pause(session_key, room_code):
+    room = Room.objects.filter(code = room_code)[0]
+
+    if room.host == session_key:
+        return True
+
+    elif room.guest_can_pause:
+        return True
+
+    return False
+
+def pause_song(session_key, room_code):
     endpoint = "player/pause"
-    response = execute_spotify_api_request(session_key, endpoint, put_=True)
+
+    host = Room.objects.filter(code=room_code)[0].host
+
+    if user_can_play_pause(session_key, room_code) is False:
+        return {'error' : 'unauthorized'}
+
+    response = execute_spotify_api_request(host, endpoint, put_=True)
     return response
 
-def play_song(session_key):
+def play_song(session_key, room_code):
     endpoint = "player/play"
-    response = execute_spotify_api_request(session_key, endpoint, put_=True)
+    host = Room.objects.filter(code=room_code)[0].host
+
+    if user_can_play_pause(session_key, room_code) is False:
+        return {'error' : 'unauthorized'}
+
+    response = execute_spotify_api_request(host, endpoint, put_=True)
+    return response
+
+def skip_next_song(session_key, room_code, is_host=False):  
+    endpoint = "player/next"
+
+    room = Room.objects.filter(code=room_code)[0]
+    votes= Vote.objects.filter(room=room)
+
+    response = user_can_skip(session_key, room_code)
+    if response is True:
+        response = execute_spotify_api_request(room.host, endpoint, post_=True)   
+        votes.delete()
+    
+    return response
+
+def skip_previous_song(session_key, room_code):
+    endpoint = "player/previous"
+
+    room = Room.objects.filter(code=room_code)[0]
+    votes = Vote.objects.filter(room=room)
+
+    response = user_can_skip(session_key, room_code)
+    if response is True:
+        response = execute_spotify_api_request(room.host, endpoint, post_=True)
+        votes.delete()
     return response

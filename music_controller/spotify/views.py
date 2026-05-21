@@ -98,6 +98,8 @@ class CurrentSong(APIView):
             artist_name= artist.get('name')
             artist_string += artist_name
 
+        votes = Vote.objects.filter(room=room).count()
+
         song = {
             'title' : name,
             'artist' : artist_string,
@@ -106,8 +108,10 @@ class CurrentSong(APIView):
             'image_url' : album_cover,
             'is_playing' : is_playing,
             'song_id' : song_id,
-            'votes' : 0
+            'votes' : votes,
+            'votes_required' : room.votes_to_skip
         }
+
         Room.objects.filter(code=room_code).update(current_song=song['song_id'])
         
         return Response({'success': song}, status=status.HTTP_200_OK)
