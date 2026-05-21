@@ -6,10 +6,14 @@ from rest_framework import status
 from rest_framework.response import Response 
 from .utils import *
 from myapp.models import Room
+from .models import Vote
 
 # Create your views here.
 
 class AuthURL(APIView) :
+    permission_classes = []
+    authentication_classes= []
+
     def get(self, request, format=None):
         scopes = 'user-read-playback-state user-modify-playback-state user-read-currently-playing'
 
@@ -47,6 +51,9 @@ def spotify_callback (request, format=None):
     return redirect('frontend:')
                                         
 class IsAuthenticated(APIView):
+    permission_classes = []
+    authentication_classes= []
+
     def get(self, request, format=None):
         print("hitting")
         if not request.session.exists(request.session.session_key):
@@ -57,6 +64,9 @@ class IsAuthenticated(APIView):
         return Response({'status' : False},status=status.HTTP_200_OK)
 
 class CurrentSong(APIView):
+    permission_classes = []
+    authentication_classes= []
+
     def get(self, request, format=None):
         room_code = self.request.session.get('room_code')
         room_details = Room.objects.filter(code=room_code)
@@ -98,29 +108,83 @@ class CurrentSong(APIView):
             'song_id' : song_id,
             'votes' : 0
         }
-
+        Room.objects.filter(code=room_code).update(current_song=song['song_id'])
+        
         return Response({'success': song}, status=status.HTTP_200_OK)
 
 class PauseSong(APIView):
+    permission_classes = []
+    authentication_classes= []
+
     def put(self, request, format=None):
         room_code = self.request.session.get('room_code')
         room = Room.objects.filter(code=room_code)[0]
-        
-        if room.host != self.request.session.session_key:
-            return Response({'Unauthorized' : 'You are not the host of this room'}, status=status.HTTP_403_FORBIDDEN)
-        
-        pause_song(room.host)
+        user = self.request.session.session_key
 
-        return Response({'success' : 'Song Paused'}, status=status.HTTP_200_OK)
+        if room.host == user:
+            pause_song(room.host, room_code)
+            return Response({'success' : 'Song Paused'}, status=status.HTTP_200_OK)
+
+        else:
+            response = pause_song(user,room_code)
+            if response == {'error' : 'unauthorized'}:
+                return Response({'error' : 'Unauthorized'}, status=status.HTTP_403_FORBIDDEN)
+
+            return Response({'success' : 'Song Paused'}, status=status.HTTP_200_OK)
 
 class PlaySong(APIView):
+    permission_classes = []
+    authentication_classes= []
+
     def put(self, request, format=None):
         room_code = self.request.session.get('room_code')
         room = Room.objects.filter(code=room_code)[0]
+        user = self.request.session.session_key
         
-        if room.host != self.request.session.session_key:
-            return Response({'Unauthorized' : 'You are not the host of this room'}, status=status.HTTP_403_FORBIDDEN)
-        
-        play_song(room.host)
+        if room.host == user:
+            response = play_song(room.host, room_code)    
+            if response == {'error' : 'unauthorized'}:
+                return Response({'error' : 'unauthorized'}, status=status.HTTP_403_FORBIDDEN)
 
-        return Response({'success' : 'Song Paused'}, status=status.HTTP_200_OK)
+            return Response({'success' : 'Song Played'}, status=status.HTTP_200_OK)
+
+        else:
+            play_song(user, room_code) 
+            return Response({'success' : 'Song Played'}, status = status.HTTP_200_OK)
+
+class SkipNextSong(APIView):
+    permission_classes = []
+    authentication_classes= []
+
+    def post(self, request, format=None):
+        room_code = self.request.session.get('room_code')
+        room = Room.objects.filter(code=room_code)[0]
+        user=self.request.session.session_key
+
+        # If room host skips song
+        if room.host == user:
+            response = skip_next_song(user,room_code=room_code, is_host=True)
+            return Response(response, status=status.HTTP_200_OK)
+    
+        # If member skips the song
+        response = skip_next_song(user,room_code=room_code, is_host=False)
+        print(response)
+        return Response(response, status=status.HTTP_200_OK)
+    
+class SkipPreviousSong(APIView):
+    permission_classes = []
+    authentication_classes= []
+
+    def post(self, request, format=None):
+        room_code = self.request.session.get('room_code')
+        room = Room.objects.filter(code=room_code)[0]
+
+        user= self.request.session.session_key
+
+        if room.host != user:
+            response = skip_previous_song(user, room_code)
+            return Response(response, status=status.HTTP_200_OK)
+        
+        else:
+            response = skip_previous_song(user, room_code)
+            return Response(response, status = status.HTTP_200_OK)
