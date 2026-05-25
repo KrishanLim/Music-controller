@@ -13,3 +13,6 @@ urllib3==2.7.0
 dj-database-url==3.0.1 
 gunicorn
 whitenoise
+psycopg2-binary
+python-dotenv
+uvicorn
