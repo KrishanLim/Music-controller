@@ -166,7 +166,7 @@ class Room extends Component {
                     {(this.state.song.title) ? (<MusicPlayerWrapper song={this.state.song}/>)
                     :
                     (<Typography variant="caption" component="h6" color="textSecondary">
-                        Start playing a song in spotifyto get started
+                        Start playing a song in spotify to get started
                     </Typography>)}
                 </Grid>
                 <Grid item xs={12} align="center">
