@@ -80,6 +80,7 @@ class Room extends Component {
         fetch('/spotify/current-song/')
         .then((response) => {
             if (!response.ok) {
+                console.log(response);
                 return {};
             }
             else {
@@ -162,9 +163,11 @@ class Room extends Component {
                     </Typography>
                 </Grid>
                 <Grid item xs={12} align="center">
-                    {(this.state.song.title) && (
-                    <MusicPlayerWrapper song={this.state.song}/>
-                    )}
+                    {(this.state.song.title) ? (<MusicPlayerWrapper song={this.state.song}/>)
+                    :
+                    (<Typography variant="caption" component="h6" color="textSecondary">
+                        Start playing a song in spotifyto get started
+                    </Typography>)}
                 </Grid>
                 <Grid item xs={12} align="center">
                     {(this.state.isHost === true) && (
